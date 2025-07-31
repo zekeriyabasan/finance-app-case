@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
+import tkinter as tk
+from tkinter import filedialog
 
 class FinanceTracker:
     def __init__(self, filename='storage.csv'):
@@ -11,7 +13,32 @@ class FinanceTracker:
             self.save()
         else:
             self.df = pd.read_csv(filename, parse_dates=["date"])
-            
+    
+    
+
+    def clean_data(self):
+        if not self.df.empty:
+            self.df["date"] = pd.to_datetime(self.df["date"], errors="coerce")
+            self.df["amount"] = pd.to_numeric(self.df["amount"], errors="coerce")
+            self.df.dropna(subset=["date", "amount"], inplace=True)
+
+    def import_csv(self, file_path):
+        new_df = pd.read_csv(file_path)
+        new_df["date"] = pd.to_datetime(new_df["date"], errors="coerce")
+        new_df["amount"] = pd.to_numeric(new_df["amount"], errors="coerce")
+        new_df.dropna(subset=["date", "amount"], inplace=True)
+
+        # Yeni ve mevcut veriyi birleştir
+        combined = pd.concat([self.df, new_df], ignore_index=True)
+
+        # Duplicate varsa kaldır
+        combined.drop_duplicates(inplace=True)
+
+        self.df = combined
+
+        # Dosyaya tekrar kaydet
+        self.df.to_csv("Storage.csv", index=False)
+        print(f"{len(new_df)} kayıt eklendi. Toplam kayıt sayısı: {len(self.df)}")    
 
     def save(self):
         self.df.to_csv(self.filename, index=False)
@@ -67,20 +94,20 @@ class FinanceTracker:
         # Tarih kolonunu datetime yap, hatalı olanları NaT yap
         if not pd.api.types.is_datetime64_any_dtype(self.df["date"]):
             self.df["date"] = pd.to_datetime(self.df["date"], errors='coerce')
-    
+
         # Geçersiz tarihleri içeren satırları çıkar
         df_clean = self.df.dropna(subset=["date"]).copy()
-    
+
         # Amount değerlerini sayısala çevir, hatalıları NaN yap
         df_clean["amount"] = pd.to_numeric(df_clean["amount"], errors="coerce")
-    
+
         # Amount NaN olanları da düşürmek isteyebilirsin
         df_clean = df_clean.dropna(subset=["amount"])
-    
+
         # Yıl bazında gruplama
         grouped = df_clean.groupby([df_clean["date"].dt.year.rename("year"), "category"])["amount"]\
             .sum().unstack(fill_value=0)
-    
+
         return grouped
 
 

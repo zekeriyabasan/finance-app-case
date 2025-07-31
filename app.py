@@ -1,5 +1,7 @@
 
 import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
 
 from tracker import FinanceTracker
 
@@ -8,6 +10,15 @@ EXPENSE_CATEGORIES = ["Market", "Fatura", "Kira", "Ulaşım", "Diğer"]
 
 tracker = FinanceTracker()
 
+def select_file():
+        root = tk.Tk()
+        root.withdraw()  # Ana pencereyi gizle
+        file_path = filedialog.askopenfilename(
+            title="CSV dosyası seçin",
+            filetypes=[("CSV dosyaları", "*.csv"), ("Tüm dosyalar", "*.*")]
+        )
+        return file_path
+
 def show_menu():
     print("""
 1. KAYIT EKLE
@@ -15,7 +26,8 @@ def show_menu():
 3. KAYIT DÜZENLE
 4. AYLIK RAPOR
 5. YILLIK RAPOR
-6. ÇIKIŞ
+U. ÇIKIŞ
+O. ÇIKIŞ
 """)
 
 while True:
@@ -91,7 +103,14 @@ while True:
     elif secim == "5":
         print(tracker.draw_yearly_report_chart())
     # ÇIKIŞ
-    elif secim == "6":
+    elif secim == "O":
         break
+    elif secim == "U":
+        csv_path = str(input("Dosya yolunu giriniz: "))
+        try:
+            tracker.import_csv(csv_path)
+            print(f"Dosya başarıyla yüklendi: {csv_path}")
+        except Exception as e:
+            print(f"Dosya yüklenirken hata oluştu: {e}")
     else:
         print("Geçersiz seçim.")
