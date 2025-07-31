@@ -64,13 +64,37 @@ class FinanceTracker:
         plt.show()
 
     def yearly_category_report(self):
-        self.df["year"] = self.df["date"].dt.to_period("Y")
-        return self.df.groupby(["year", "category", "type"])["amount"].sum().unstack(fill_value=0)
+        # Tarih kolonunu datetime yap, hatalı olanları NaT yap
+        if not pd.api.types.is_datetime64_any_dtype(self.df["date"]):
+            self.df["date"] = pd.to_datetime(self.df["date"], errors='coerce')
+    
+        # Geçersiz tarihleri içeren satırları çıkar
+        df_clean = self.df.dropna(subset=["date"]).copy()
+    
+        # Amount değerlerini sayısala çevir, hatalıları NaN yap
+        df_clean["amount"] = pd.to_numeric(df_clean["amount"], errors="coerce")
+    
+        # Amount NaN olanları da düşürmek isteyebilirsin
+        df_clean = df_clean.dropna(subset=["amount"])
+    
+        # Yıl bazında gruplama
+        grouped = df_clean.groupby([df_clean["date"].dt.year.rename("year"), "category"])["amount"]\
+            .sum().unstack(fill_value=0)
+    
+        return grouped
+
+
 
     def draw_yearly_report_chart(self):
         data = self.yearly_category_report()
-        data.plot(kind="bar", title="Yıllık Gelir/Gider", ylabel="Tutar (₺)", xlabel="Yıl")
-        plt.xticks(rotation=0)
+        print(data)  # istersen yazdırabilirsin
+
+        ax = data.plot(kind="bar", stacked=False, figsize=(12,6))
+        ax.set_title("Yıllık Kategori Bazlı Harcamalar")
+        ax.set_xlabel("Yıl")
+        ax.set_ylabel("Toplam Tutar (₺)")
+        ax.legend(title="Kategori")
         plt.tight_layout()
         plt.show()
+
 
