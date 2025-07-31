@@ -1,2 +1,10 @@
-date,type,category,amount,note
-2025-07-31 21:18:57.020461,gelir,Maaş,5555555.0,harika bi maaş
+date,type,category,amount,note,year
+2026-03-30 21:57:18.604866,gelir,Maaş,270400.0,harika bi maaş,2025.0
+2026-02-30 21:57:18.604866,gelir,Kira,2500.0,kira sdf,
+2025-05-31 21:57:18.604866,gelir,Kira,2500.0,kira sdf,
+2026-04-30 21:57:18.604866,gider,Yiyecek,12345531.234,harika,
+2026-03-30 21:57:18.604866,gider,Diğer,23423.2,sfdsgsdg,
+2025-01-31 22:37:34.607592,gelir,Maaş,2345646.234234,sdgsgdsf,
+2026-05-31 22:37:45.903815,gelir,Kira,23423525.0,sdgsdgsdg,
+2026-07-30 21:57:18.604866,gelir,Prim,23425643.23423,sddfgdf,
+2026-02-30 21:57:18.604866,gider,Ulaşım,234235.0,sdgs,

@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import datetime
+import matplotlib.pyplot as plt
 
 class FinanceTracker:
     def __init__(self, filename='storage.csv'):
@@ -10,6 +11,7 @@ class FinanceTracker:
             self.save()
         else:
             self.df = pd.read_csv(filename, parse_dates=["date"])
+            
 
     def save(self):
         self.df.to_csv(self.filename, index=False)
@@ -36,30 +38,39 @@ class FinanceTracker:
                 self.df.at[index, key] = value
         self.save()
 
-    def report_by_category(self):
-        return self.df.groupby(["type", "category"])["amount"].sum()
 
-    def report_by_month(self):
-        self.df['month'] = self.df['date'].dt.to_period('M')
-        return self.df.groupby(['month', 'type'])['amount'].sum()
 
-    def import_csv(self, path):
-        imported = pd.read_csv(path, parse_dates=["date"])
-        self.df = pd.concat([self.df, imported], ignore_index=True)
-        self.save()
+    def monthly_category_report(self, year):
+        if not pd.api.types.is_datetime64_any_dtype(self.df["date"]):
+            self.df["date"] = pd.to_datetime(self.df["date"], format="%Y-%m-%d %H:%M:%S", errors='coerce')
 
-    def export_csv(self, export_path):
-        self.df.to_csv(export_path, index=False)
-
-    def spending_by_category(self):
-        giderler = self.df[self.df["type"] == "gider"]
-        return giderler.groupby("category")["amount"].sum().sort_values(ascending=False)
+        self.df["amount"] = pd.to_numeric(self.df["amount"], errors="coerce")
+        
+        df_year = self.df[self.df["date"].dt.year == year].copy()
+        df_year["month"] = df_year["date"].dt.month
+        grouped = df_year.groupby(["month", "category"])["amount"].sum().unstack(fill_value=0)
+        grouped = grouped.reindex(range(1, 13), fill_value=0)
+        return grouped
     
-    def monthly_report(self):
-        self.df["month"] = self.df["date"].dt.to_period("M")
-        return self.df.groupby(["month", "type"])["amount"].sum().unstack(fill_value=0)
-    
-    def yearly_report(self):
-        self.df["year"] = self.df["date"].dt.year
-        return self.df.groupby(["year", "type"])["amount"].sum().unstack(fill_value=0)
+    def draw_monthly_report_chart(self, year):
+        data = self.monthly_category_report(year)
+        print(data)
+        ax = data.plot(kind="bar", stacked=False, figsize=(12,6))
+        ax.set_title(f"{year} Yılı Aylık Kategori Bazlı Harcamalar")
+        ax.set_xlabel("Ay")
+        ax.set_ylabel("Toplam Tutar (₺)")
+        ax.set_xticklabels([str(m) for m in range(1, 13)], rotation=0)
+        plt.legend(title="Kategori")
+        plt.show()
+
+    def yearly_category_report(self):
+        self.df["year"] = self.df["date"].dt.to_period("Y")
+        return self.df.groupby(["year", "category", "type"])["amount"].sum().unstack(fill_value=0)
+
+    def draw_yearly_report_chart(self):
+        data = self.yearly_category_report()
+        data.plot(kind="bar", title="Yıllık Gelir/Gider", ylabel="Tutar (₺)", xlabel="Yıl")
+        plt.xticks(rotation=0)
+        plt.tight_layout()
+        plt.show()
 
