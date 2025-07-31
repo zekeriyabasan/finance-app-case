@@ -50,3 +50,16 @@ class FinanceTracker:
 
     def export_csv(self, export_path):
         self.df.to_csv(export_path, index=False)
+
+    def spending_by_category(self):
+        giderler = self.df[self.df["type"] == "gider"]
+        return giderler.groupby("category")["amount"].sum().sort_values(ascending=False)
+    
+    def monthly_report(self):
+        self.df["month"] = self.df["date"].dt.to_period("M")
+        return self.df.groupby(["month", "type"])["amount"].sum().unstack(fill_value=0)
+    
+    def yearly_report(self):
+        self.df["year"] = self.df["date"].dt.year
+        return self.df.groupby(["year", "type"])["amount"].sum().unstack(fill_value=0)
+
