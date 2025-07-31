@@ -1,13 +1,15 @@
+import os
 import pandas as pd
 import datetime
 
 class FinanceTracker:
     def __init__(self, filename='storage.csv'):
         self.filename = filename
-        try:
-            self.df = pd.read_csv(filename, parse_dates=["date"])
-        except FileNotFoundError:
+        if not os.path.exists(filename) or os.stat(filename).st_size == 0:
             self.df = pd.DataFrame(columns=["date", "type", "category", "amount", "note"])
+            self.save()
+        else:
+            self.df = pd.read_csv(filename, parse_dates=["date"])
 
     def save(self):
         self.df.to_csv(self.filename, index=False)
