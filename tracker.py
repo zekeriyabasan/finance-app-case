@@ -39,6 +39,12 @@ class FinanceTracker:
         # Dosyaya tekrar kaydet
         self.df.to_csv("Storage.csv", index=False)
         print(f"{len(new_df)} kayıt eklendi. Toplam kayıt sayısı: {len(self.df)}")    
+    def export_csv(self, export_path="storage.csv"):
+        try:
+            self.df.to_csv(export_path, index=False)
+            print(f"Veriler başarıyla '{export_path}' dosyasına kaydedildi.")
+        except Exception as e:
+            print(f"Export sırasında hata oluştu: {e}")
 
     def save(self):
         self.df.to_csv(self.filename, index=False)

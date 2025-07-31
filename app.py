@@ -26,7 +26,8 @@ def show_menu():
 3. KAYIT DÜZENLE
 4. AYLIK RAPOR
 5. YILLIK RAPOR
-U. ÇIKIŞ
+I. IMPORT CSV
+E. EXPORT CSV
 O. ÇIKIŞ
 """)
 
@@ -105,12 +106,18 @@ while True:
     # ÇIKIŞ
     elif secim == "O":
         break
-    elif secim == "U":
+    elif secim == "I":
         csv_path = str(input("Dosya yolunu giriniz: "))
         try:
             tracker.import_csv(csv_path)
             print(f"Dosya başarıyla yüklendi: {csv_path}")
         except Exception as e:
             print(f"Dosya yüklenirken hata oluştu: {e}")
+    elif secim == "E":
+        new_path = input("Yeni dosya yolunu ve adını girin (örnek: C:\\Users\\Desktop\\zek.csvyedek_kayit.csv):").strip()
+        if new_path:
+            tracker.export_csv(new_path)
+        else:
+            print("Dosya adı geçerli değil.")
     else:
         print("Geçersiz seçim.")
